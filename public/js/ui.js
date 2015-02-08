@@ -55,19 +55,39 @@ $class.createComponents = function () {
 
 $class.listen = function () {
     var self = this;
-    $(osc1FreqSlider).on('slidechange', function (event, ui) {
+    // frequency
+    $(osc1FreqSlider).on('slide', function (event, ui) {
        self.board.audioComponents.osc1.frequency.value = ui.value;
     });
-    $(osc2FreqSlider).on('slidechange', function (event, ui) {
+    $(osc2FreqSlider).on('slide', function (event, ui) {
         self.board.audioComponents.osc2.frequency.value = ui.value;
     });
-
-    $(primaryTimingSlider).on('slidechange', function (event, ui) {
+    // timing
+    $(primaryTimingSlider).on('slide', function (event, ui) {
         self.board.logicBoard.setPrimaryOffset(ui.value);
     });
-    $(secondaryTimingSlider).on('slidechange', function (event, ui) {
+    $(secondaryTimingSlider).on('slide', function (event, ui) {
        self.board.logicBoard.secondaryOffset = ui.value;
     });
+
+    // volume values
+    var osc1VolVal;
+    $('#osc1Toggle').on('mousedown', function (event, ui) {
+        osc1VolVal =  self.board.logicBoard.osc1Vol;
+        self.board.logicBoard.setOsc1Vol(0)
+    });
+    $('#osc1Toggle').on('mouseup', function (event, ui) {
+        self.board.logicBoard.setOsc1Vol(osc1VolVal);
+    });
+    var osc2VolVal;
+    $('#osc2Toggle').on('mousedown', function (event, ui) {
+        osc2VolVal =  self.board.logicBoard.osc2Vol;
+        self.board.logicBoard.setOsc2Vol(0)
+    });
+    $('#osc2Toggle').on('mouseup', function (event, ui) {
+        self.board.logicBoard.setOsc2Vol(osc2VolVal);
+    });
+
     $('#power').on('change', function (event, ui) {
         var checked = $(event.target).is(':checked');
         if (checked) {
