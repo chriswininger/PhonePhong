@@ -62,6 +62,10 @@ $class.setPrimaryOffset = function (value) {
     mainInterval = setInterval(_.bind(this.primaryLoop, this), this.mainTimeOffset);
 };
 
+$class.setSecondaryOffset = function (value) {
+    this.secondaryOffset = value;
+}
+
 // --- private functions ---
 function _pulse (opts, complete) {
     opts.gain.value = 0;

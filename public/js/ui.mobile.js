@@ -1,3 +1,15 @@
+/**
+ * Latest thoughts on controls:
+ *  Distance from center of each dot will control the offset, but sliders on the edge of the screen will
+ *  let you move both dots up and down, or left and right as a group with fixed relative positions
+ *    (Doesn't really work though, moving one pitch up would pitch shift the other one)
+ *
+ * Pinching/zoom will let you make dots bigger/smaller to control the volume
+ *   double tab dot will turn it off/on
+ * @type {{}|*|Window.PhonePhong}
+ */
+
+
 window.PhonePhong = window.PhonePhong || {};
 window.PhonePhong.UI = function (board) {
     var self = this;
@@ -10,7 +22,9 @@ window.PhonePhong.UI = function (board) {
         osc1Freq: 100,
         osc2Freq: 200,
         osc1MaxFreq: 5000,
-        osc2MaxFreq: 5000
+        osc2MaxFreq: 5000,
+        primaryOffsetMax: 5000,
+        secondaryOffsetMax: 10
     };
 
     // seed board with default values
@@ -48,9 +62,12 @@ $class.listen = function () {
 
             if (event.target.id === oscTouch1.id) {
                 // update logic board
-                self.board.logicBoard.setOsc1Freq(map(touch.pageY, 0, window.innerHeight-event.target.getAttribute('height'), 0, self.defaults.osc1MaxFreq));
+                self.board.logicBoard.setOsc1Freq(map(touch.pageY, event.target.getAttribute('r'), window.innerHeight - event.target.getAttribute('r'), 0, self.defaults.osc1MaxFreq));
+                self.board.logicBoard.setPrimaryOffset(map(touch.pageX, event.target.getAttribute('r'), window.innerWidth - event.target.getAttribute('r'), 0, self.defaults.primaryOffsetMax));
             } else if (event.target.id === oscTouch2.id) {
-                self.board.logicBoard.setOsc2Freq(map(touch.pageY, 0, window.innerHeight-event.target.getAttribute('height'), 0, self.defaults.osc1MaxFreq));
+                self.board.logicBoard.setOsc2Freq(map(touch.pageY, event.target.getAttribute('r'), window.innerHeight - event.target.getAttribute('height'), 0, self.defaults.osc1MaxFreq));
+                self.board.logicBoard.setSecondaryOffset(map(touch.pageX, event.target.getAttribute('r'), window.innerWidth - event.target.getAttribute('r'), 0, self.defaults.secondaryOffsetMax));
+
             }
 
             event.preventDefault();
