@@ -18,13 +18,14 @@ $class.initBlinkCycle = function () {
 
 var timeOutCnt = 0;
 var loopRunning = false;
+//var len = 100;
 $class.primaryLoop = function () {
     //if (loopRunning) return;
     loopRunning = true;
     var len = this.mainTimeOffset > 100 ? 100 : Math.floor(this.mainTimeOffset/1.75);
-    var pulses = [{ gain: this.audioComponets.oscVol1.gain, len: 100, currVol: this.osc1Vol }];
+    var pulses = [{ osc: this.audioComponets.osc1, gain: this.audioComponets.oscVol1.gain, len: len, currVol: this.osc1Vol }];
     if (timeOutCnt >= this.secondaryOffset) {
-        pulses.push({ gain: this.audioComponets.oscVol2.gain, len: 100, currVol: this.osc2Vol });
+        pulses.push({ osc: this.audioComponets.osc2, gain: this.audioComponets.oscVol2.gain, len: len, currVol: this.osc2Vol });
         timeOutCnt = 0;
     } else {
         timeOutCnt++;
@@ -68,6 +69,8 @@ $class.setSecondaryOffset = function (value) {
 
 // --- private functions ---
 function _pulse (opts, complete) {
+    //opts.osc.stop();
+    //opts.osc.start(opts.len);
     opts.gain.value = 0;
     setTimeout(function () {
         opts.gain.value = opts.currVol;

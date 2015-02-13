@@ -21,9 +21,10 @@ window.PhonePhong.UI = function (board) {
         osc2Vol: 0.5,
         osc1Freq: 100,
         osc2Freq: 200,
-        osc1MaxFreq: 5000,
-        osc2MaxFreq: 5000,
-        primaryOffsetMax: 5000,
+        primaryOffset: 20,
+        osc1MaxFreq: 2000,
+        osc2MaxFreq: 2000,
+        primaryOffsetMax: 2000,
         secondaryOffsetMax: 10
     };
 
@@ -47,7 +48,8 @@ $class.createComponents = function () {
 $class.listen = function () {
     var self = this;
     var oscTouch1 = document.getElementById('oscTouch1'),
-        oscTouch2 = document.getElementById('oscTouch2');
+        oscTouch2 = document.getElementById('oscTouch2'),
+        oscTouch1Text = document.getElementById('oscTouch1Text');
 
     oscTouch1.addEventListener('touchmove', _handleOSCTouchMove, false);
     oscTouch2.addEventListener('touchmove', _handleOSCTouchMove, false);
@@ -60,13 +62,26 @@ $class.listen = function () {
             event.target.setAttribute('cx', touch.pageX);
             event.target.setAttribute('cy', touch.pageY);
 
+            var r = parseInt(event.target.getAttribute('r'));
+
             if (event.target.id === oscTouch1.id) {
+                oscTouch1Text.setAttribute('x', touch.pageX);
+                oscTouch1Text.setAttribute('y', touch.pageY);
+
                 // update logic board
-                self.board.logicBoard.setOsc1Freq(map(touch.pageY, event.target.getAttribute('r'), window.innerHeight - event.target.getAttribute('r'), 0, self.defaults.osc1MaxFreq));
-                self.board.logicBoard.setPrimaryOffset(map(touch.pageX, event.target.getAttribute('r'), window.innerWidth - event.target.getAttribute('r'), 0, self.defaults.primaryOffsetMax));
+                var freq = Math.floor(map(touch.pageY, r, window.innerHeight - r, 0, self.defaults.osc1MaxFreq));
+                var primaryOffset= Math.floor(map(touch.pageX, r, window.innerWidth - r, 0, self.defaults.primaryOffsetMax));
+                // display offset
+                oscTouch1Text.textContent = primaryOffset;
+
+                if (freq<0)freq=0;
+                if (primaryOffset<0) primaryOffset=0;
+
+                self.board.logicBoard.setOsc1Freq(freq);
+                self.board.logicBoard.setPrimaryOffset(primaryOffset);
             } else if (event.target.id === oscTouch2.id) {
-                self.board.logicBoard.setOsc2Freq(map(touch.pageY, event.target.getAttribute('r'), window.innerHeight - event.target.getAttribute('height'), 0, self.defaults.osc1MaxFreq));
-                self.board.logicBoard.setSecondaryOffset(map(touch.pageX, event.target.getAttribute('r'), window.innerWidth - event.target.getAttribute('r'), 0, self.defaults.secondaryOffsetMax));
+                self.board.logicBoard.setOsc2Freq(map(touch.pageY, r, window.innerHeight - event.target.getAttribute('height'), 0, self.defaults.osc1MaxFreq));
+                self.board.logicBoard.setSecondaryOffset(map(touch.pageX, r, window.innerWidth - r, 0, self.defaults.secondaryOffsetMax));
 
             }
 
@@ -80,6 +95,7 @@ $class.updateBoard = function (values) {
     this.board.logicBoard.setOsc2Vol(values.osc2Vol);
     this.board.logicBoard.setOsc1Freq(values.osc1Freq);
     this.board.logicBoard.setOsc2Freq(values.osc2Freq);
+    this.board.logicBoard.setPrimaryOffset(values.primaryOffset);
 };
 
 // --- private helper functions ---
