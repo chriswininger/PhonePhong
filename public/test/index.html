@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phong Phone</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+    <script src="../js/lib/jquery.ui.touch-punch.min.js"></script>
+
+    <script src="../js/lib/lodash.min.js"></script>
+    <script src="../js/lib/async.js"></script>
+
+    <link rel="stylesheet" href="../css/main.css" />
+
+
+    <script type="text/javascript">
+        var max = 0;
+        var min = 0;
+        var volume;
+        (function () {
+            /*var AudioContext = window.AudioContext || window.webkitAudioContext;
+
+            var audioCtx = new AudioContext();
+
+
+            var oscillator = audioCtx.createOscillator();
+            var lfo = audioCtx.createOscillator();
+
+
+            lfo.frequency.value = 0.5; // 2Hz: two oscillations par second
+            lfo.type = 'square';
+            var gain = audioCtx.createGain();
+
+            lfo.connect(gain.gain);
+            oscillator.connect(gain);
+            gain.connect(audioCtx.destination);
+            oscillator.start();
+            lfo.start();*/
+
+
+            /*var audCtx = new webkitAudioContext();
+            var mainVol = audCtx.createGain();
+
+            mainVol.gain.value = 0.5;
+            mainVol.connect(audCtx.destination);
+
+            var time = audCtx.currentTime;
+            var endTime = time + 10*0.5 + 0.1;
+            var cycleEnding = 0.0;
+            var noteBegin = 0.0;
+            var noteLen = 0.5
+            var silence = 0.01;
+            var lookAhead = 0.1;
+            //schedule();
+
+            setInterval(function () {
+                if (audCtx.currentTime + lookAhead > cycleEnding) {
+                    schedule();
+                }
+            },10);
+
+            function schedule () {
+                cycleEnding = noteBegin + 10*(noteBegin + noteLen + silence);
+                for (var i = 0; i < 10; i++) {
+                    var osc1 = audCtx.createOscillator();
+                    osc1.frequency.value = 440;
+                    osc1.connect(mainVol);
+                    osc1.start(noteBegin);
+                    osc1.stop(noteBegin + noteLen);
+                    noteBegin += noteBegin + noteLen + silence;
+                }
+            }*/
+
+
+            var ac = new webkitAudioContext(),
+                    osc = ac.createOscillator(),
+                    lfo = ac.createOscillator();
+            volume = ac.createGain();
+            volume.gain.value = 0.0;
+
+            var bufferSize = 4096;
+
+            var effect = (function() {
+                var node = ac.createScriptProcessor(bufferSize, 1, 1);
+                node.onaudioprocess = function(e) {
+                    var input = e.inputBuffer.getChannelData(0);
+                    var output = e.outputBuffer.getChannelData(0);
+                    for (var i = 0; i < bufferSize; i++) {
+                        output[i] = 1;//input[i];
+                        //if (output[i] < 0) output[i] = 0;
+                        //output[i] = 0;
+                        if (input[0] > max) max = input[0];
+                        if (input[i] < 0) output[i] = 0;
+                        else output[i] = input[i];
+                    }
+                }
+                return node;
+            })();
+
+
+            osc.frequency.value = 440;
+            lfo.frequency.value = 0.5;
+            lfo.type = 'square';
+            // maybe switch to sine if value is above 5
+            osc.connect(volume);
+            lfo.connect(effect);
+            effect.connect(volume.gain);
+            volume.connect(ac.destination);
+            osc.start(0);
+            lfo.start(0);
+
+
+
+           /* var audCtx = new webkitAudioContext();
+            var mainVol = audCtx.createGain();
+
+            mainVol.gain.value = 0.5;
+            mainVol.connect(audCtx.destination);
+
+            var time = audCtx.currentTime;
+            var endTime = time + 10*0.5 + 0.1;
+            //schedule();
+
+            setInterval(function () {
+                if (audCtx.currentTime + 0.1 > endTime) {
+                    schedule();
+                }
+            },50);
+
+            function schedule () {
+                time = audCtx.currentTime;
+                endTime = time + 10*0.5 + 0.1;
+                for (var i = 0; i < 10; i++) {
+                    var osc1 = audCtx.createOscillator();
+                    osc1.frequency.value = 440;
+                    osc1.connect(mainVol);
+                    osc1.start(time + i*0.5);
+                    osc1.stop(time + i*0.5 + 0.1);
+                }
+            }*/
+
+
+        })();
+
+
+
+    </script>
+</head>
+<body>
+<div id="ui-desktop">
+
+
+</div>
+
+</body>
+</html>

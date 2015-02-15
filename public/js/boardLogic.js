@@ -1,19 +1,55 @@
 window.PhonePhong = window.PhonePhong || {};
-window.PhonePhong.BoardLogic = function (audioComponents) {
-    this.audioComponets = audioComponents;
+window.PhonePhong.BoardLogic = function (audCtx, opts) {
+    // instantiate audio sources
+    this.audCtx = audCtx;
+    this.mainVol = audCtx.createGain();
+
+    this.osc1 = audCtx.createOscillator();
+    this.osc2 = audCtx.createOscillator();
+    this.osc1.type = 'sine';
+    this.osc2.type = 'sine';
+    //osc2.frequency.value = 1000;
+
+    this.oscVol1 = audCtx.createGain();
+    this.oscVol2 = audCtx.createGain();
+    // initialize default settings
+    //this.mainVol.gain.value = 0.5;
+    //this.oscVol1.gain.value = 0.9949676394462585;
+    //this.oscVol2.gain.value = 0.9949676394462585;
+
+    this.osc1GainCtrl = audCtx.createOscillator();
+    this.osc2GainCtrl = audCtx.createOscillator();
+    //this.osc1GainCtrl.frequency.value = 0.25;
+    //this.osc2GainCtrl.frequency.value = 1.0;
+    this.osc1GainCtrl.type = 'square';
+    this.osc2GainCtrl.type = 'square';
+
+    this.osc1GainCtrl.connect(this.oscVol1.gain);
+    this.osc2GainCtrl.connect(this.oscVol2.gain);
+
+    this.osc1.connect(this.oscVol1);
+    this.osc2.connect(this.oscVol2);
+    this.oscVol1.connect(this.mainVol);
+    this.oscVol2.connect(this.mainVol);
+    this.mainVol.connect(this.audCtx.destination);
 
     // defaults
-    this.mainTimeOffset = 1000;
-    this.secondaryOffset = 2;
+    this.updateBoard(opts);
+    //this.mainTimeOffset = 1000;
+    //this.secondaryOffset = 2;
 
-    this.initBlinkCycle();
+    this.init();
 };
 
 var $class = PhonePhong.BoardLogic.prototype;
 
 var mainInterval;
-$class.initBlinkCycle = function () {
-    mainInterval = setInterval(_.bind(this.primaryLoop, this), this.mainTimeOffset);
+$class.init = function () {
+    this.osc1.start();
+    this.osc2.start();
+    this.osc1GainCtrl.start();
+    this.osc2GainCtrl.start();
+    //mainInterval = setInterval(_.bind(this.primaryLoop, this), this.mainTimeOffset);
 };
 
 var timeOutCnt = 0;
@@ -23,9 +59,9 @@ $class.primaryLoop = function () {
     //if (loopRunning) return;
     loopRunning = true;
     var len = this.mainTimeOffset > 100 ? 100 : Math.floor(this.mainTimeOffset/1.75);
-    var pulses = [{ osc: this.audioComponets.osc1, gain: this.audioComponets.oscVol1.gain, len: len, currVol: this.osc1Vol }];
+    var pulses = [{ osc: this.osc1, gain: this.oscVol1.gain, len: len, currVol: this.osc1Vol }];
     if (timeOutCnt >= this.secondaryOffset) {
-        pulses.push({ osc: this.audioComponets.osc2, gain: this.audioComponets.oscVol2.gain, len: len, currVol: this.osc2Vol });
+        pulses.push({ osc: this.osc2, gain: this.oscVol2.gain, len: len, currVol: this.osc2Vol });
         timeOutCnt = 0;
     } else {
         timeOutCnt++;
@@ -34,38 +70,59 @@ $class.primaryLoop = function () {
     async.each(pulses, _pulse, function () {
        loopRunning = false;
     });
+};
 
+$class.setMainVol = function (vol) {
+    this.mainVol.gain.value = vol;
 };
 
 $class.setOsc1Vol = function (vol) {
     this.osc1Vol = vol;
-    this.audioComponets.oscVol1.gain.value = vol;
+    this.oscVol1.gain.value = vol;
 };
 
 $class.setOsc2Vol = function (vol) {
     this.osc2Vol = vol;
-    this.audioComponets.oscVol2.gain.value = vol;
+    this.oscVol2.gain.value = vol;
 };
 
 $class.setOsc1Freq = function (freq) {
     this.osc1Freq = freq;
-    this.audioComponets.osc1.frequency.value = freq;
+    this.osc1.frequency.value = freq;
 };
 
 $class.setOsc2Freq = function (freq) {
     this.osc2Freq = freq;
-    this.audioComponets.osc2.frequency.value = freq;
+    this.osc2.frequency.value = freq;
 };
 
 $class.setPrimaryOffset = function (value) {
     this.mainTimeOffset = value;
-    clearInterval(mainInterval);
-    mainInterval = setInterval(_.bind(this.primaryLoop, this), this.mainTimeOffset);
+    this.osc1GainCtrl.frequency.value = value;
+    //clearInterval(mainInterval);
+    //mainInterval = setInterval(_.bind(this.primaryLoop, this), this.mainTimeOffset);
 };
 
 $class.setSecondaryOffset = function (value) {
     this.secondaryOffset = value;
+    this.osc2GainCtrl.frequency.value = value;
 }
+
+$class.updateBoard = function (values) {
+    this.setOsc1Vol(values.osc1Vol);
+    this.setOsc2Vol(values.osc2Vol);
+    this.setOsc1Freq(values.osc1Freq);
+    this.setOsc2Freq(values.osc2Freq);
+    this.setPrimaryOffset(values.primaryOffset);
+
+    this.setMainVol(values.mainVol);
+    this.setSecondaryOffset(values.secondaryOffset);
+
+    this.osc1MaxFreq = values.osc1MaxFreq;
+    this.osc2MaxFreq = values.osc2MaxFreq;
+    this.primaryOffsetMax = values.primaryOffsetMax;
+    this.secondaryOffsetMax = values.secondaryOffsetMax;
+};
 
 // --- private functions ---
 function _pulse (opts, complete) {
