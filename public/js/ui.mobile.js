@@ -26,8 +26,15 @@ window.PhonePhong.UI = function (board) {
 
 var $class = PhonePhong.UI.prototype;
 
+var oscTouchOnOff1, oscTouchOnOff2;
 $class.createComponents = function () {
     $('#phongUIGrid').height(window.innerHeight);
+    oscTouchOnOff1 = $('#oscTouchOnOff1')[0]
+    oscTouchOnOff2 = $('#oscTouchOnOff2')[0];
+
+
+    oscTouchOnOff1.setAttribute('y', window.innerHeight - oscTouchOnOff1.getAttribute('height'));
+    oscTouchOnOff2.setAttribute('y', window.innerHeight - oscTouchOnOff2.getAttribute('height'));
 };
 
 $class.listen = function () {
@@ -38,19 +45,58 @@ $class.listen = function () {
     oscTouch1.addEventListener('touchmove', _handleOSCTouchMove, false);
     oscTouch2.addEventListener('touchmove', _handleOSCTouchMove, false);
 
+    oscTouchOnOff1.addEventListener('touchstart', _handleOff);
+    oscTouchOnOff1.addEventListener('touchend', _handleOn);
+    oscTouchOnOff2.addEventListener('touchstart', _handleOff);
+    oscTouchOnOff2.addEventListener('touchend', _handleOn);
+
     var osc1PulseOn = true;
-    $(oscTouch1).on("tap",function(){
+    $(oscTouch1).on('tap',function(){
         if (osc1PulseOn) self.board.stopOsc1Pulse();
         else self.board.startOsc1Pulse();
         osc1PulseOn = !osc1PulseOn;
     });
 
     var osc2PulseOn = true;
-    $(oscTouch2).on("tap",function(){
+    $(oscTouch2).on('tap',function(){
         if (osc2PulseOn) self.board.stopOsc2Pulse();
         else self.board.startOsc2Pulse();
         osc2PulseOn = !osc2PulseOn;
     });
+
+
+    $(oscTouch1).on('taphold', _handleLongTouch);
+    $(oscTouch2).on('taphold', _handleLongTouch);
+
+    function _handleOff (event) {
+        if (event.target === oscTouchOnOff1) {
+            self.board.osc1Off();
+        } else if (event.target === oscTouchOnOff2) {
+            self.board.osc2Off();
+        }
+        event.preventDefault();
+    }
+    function _handleOn (event) {
+        if (event.target === oscTouchOnOff1) {
+            self.board.osc1On();
+        } else if (event.target === oscTouchOnOff2) {
+            self.board.osc2On();
+        }
+        event.preventDefault();
+    }
+    var waves = ['sine', 'square', 'triangle', 'sawtooth'];
+    var waveIntOsc1 = 0, waveIntOsc2 = 0;
+    function _handleLongTouch (event) {
+        if (event.target === oscTouch1) {
+            waveIntOsc1++;
+            if (waveIntOsc1 >= waves.length) waveIntOsc1 = 0;
+            self.board.setOsc1Type(waves[waveIntOsc1]);
+        } else if (event.target === oscTouch2) {
+            waveIntOsc2++;
+            if (waveIntOsc2 >= waves.length) waveIntOsc2 = 0;
+            self.board.setOsc1Type(waves[waveIntOsc2]);
+        }
+    }
 
     function _handleOSCTouchMove  (event) {
         // If there's exactly one finger inside this element
