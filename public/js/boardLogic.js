@@ -106,7 +106,21 @@ $class.setPrimaryOffset = function (value) {
 $class.setSecondaryOffset = function (value) {
     this.secondaryOffset = value;
     this.osc2GainCtrl.frequency.value = value;
-}
+};
+
+$class.stopOsc1Pulse = function () {
+    this.osc1GainCtrl.disconnect(this.oscVol1.gain);
+};
+$class.startOsc1Pulse = function () {
+    this.osc1GainCtrl.connect(this.oscVol1.gain);
+};
+
+$class.stopOsc2Pulse = function () {
+    this.osc2GainCtrl.disconnect(this.oscVol2.gain);
+};
+$class.startOsc2Pulse = function () {
+    this.osc2GainCtrl.connect(this.oscVol2.gain);
+};
 
 $class.updateBoard = function (values) {
     this.setOsc1Vol(values.osc1Vol);

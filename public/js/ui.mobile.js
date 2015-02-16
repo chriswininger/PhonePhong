@@ -38,6 +38,20 @@ $class.listen = function () {
     oscTouch1.addEventListener('touchmove', _handleOSCTouchMove, false);
     oscTouch2.addEventListener('touchmove', _handleOSCTouchMove, false);
 
+    var osc1PulseOn = true;
+    $(oscTouch1).on("tap",function(){
+        if (osc1PulseOn) self.board.stopOsc1Pulse();
+        else self.board.startOsc1Pulse();
+        osc1PulseOn = !osc1PulseOn;
+    });
+
+    var osc2PulseOn = true;
+    $(oscTouch2).on("tap",function(){
+        if (osc2PulseOn) self.board.stopOsc2Pulse();
+        else self.board.startOsc2Pulse();
+        osc2PulseOn = !osc2PulseOn;
+    });
+
     function _handleOSCTouchMove  (event) {
         // If there's exactly one finger inside this element
         if (event.targetTouches.length == 1) {
