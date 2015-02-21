@@ -26,12 +26,14 @@ window.PhonePhong.UI = function (board) {
 
 var $class = PhonePhong.UI.prototype;
 
-var oscTouchOnOff1, oscTouchOnOff2;
+var oscTouchOnOff1, oscTouchOnOff2, oscTouchFade1, oscTouchFade2;
+var oscTouchFade1Val = 0, oscTouchFade2Val = 0;
 $class.createComponents = function () {
     $('#phongUIGrid').height(window.innerHeight);
-    oscTouchOnOff1 = $('#oscTouchOnOff1')[0]
-    oscTouchOnOff2 = $('#oscTouchOnOff2')[0];
-
+    oscTouchOnOff1 = document.getElementById('oscTouchOnOff1');
+    oscTouchOnOff2 = document.getElementById('oscTouchOnOff2');
+    oscTouchFade1 = document.getElementById('oscTouchFade1');
+    oscTouchFade2 = document.getElementById('oscTouchFade2');
 
     oscTouchOnOff1.setAttribute('y', window.innerHeight - oscTouchOnOff1.getAttribute('height'));
     oscTouchOnOff2.setAttribute('y', window.innerHeight - oscTouchOnOff2.getAttribute('height'));
@@ -44,6 +46,9 @@ $class.listen = function () {
 
     oscTouch1.addEventListener('touchmove', _handleOSCTouchMove, false);
     oscTouch2.addEventListener('touchmove', _handleOSCTouchMove, false);
+
+    oscTouchFade1.addEventListener('touchmove', _handleFadeMove, false);
+    oscTouchFade2.addEventListener('touchmove', _handleFadeMove, false);
 
     oscTouchOnOff1.addEventListener('touchstart', _handleOff);
     oscTouchOnOff1.addEventListener('touchend', _handleOn);
@@ -94,20 +99,20 @@ $class.listen = function () {
         } else if (event.target === oscTouch2) {
             waveIntOsc2++;
             if (waveIntOsc2 >= waves.length) waveIntOsc2 = 0;
-            self.board.setOsc1Type(waves[waveIntOsc2]);
+            self.board.setOsc2Type(waves[waveIntOsc2]);
         }
+
+        event.preventDefault();
     }
 
     function _handleOSCTouchMove  (event) {
         // If there's exactly one finger inside this element
         if (event.targetTouches.length == 1) {
             var touch = event.targetTouches[0];
-            // Place element where the finger is
-            event.target.setAttribute('cx', touch.pageX);
-            event.target.setAttribute('cy', touch.pageY);
-
             var r = parseInt(event.target.getAttribute('r'));
 
+            var fadeUIElement;
+            var fadeUIOffset;
             if (event.target.id === oscTouch1.id) {
                 // update logic board
                 var freq = map(touch.pageY, (r/2), window.innerHeight - r, 0, self.board.osc1MaxFreq);
@@ -118,13 +123,41 @@ $class.listen = function () {
 
                 self.board.setOsc1Freq(freq);
                 self.board.setPrimaryOffset(primaryOffset);
+                fadeUIOffset = oscTouchFade1Val;
+                // set other elements to move
+                fadeUIElement = oscTouchFade1;
             } else if (event.target.id === oscTouch2.id) {
                 self.board.setOsc2Freq(map(touch.pageY, (r/2), window.innerHeight - event.target.getAttribute('height'), 0, self.board.osc1MaxFreq));
                 self.board.setSecondaryOffset(map(touch.pageX, (r/2), window.innerWidth - r, 0, self.board.secondaryOffsetMax));
 
+                fadeUIOffset = oscTouchFade2Val;
+                // set other elements to move
+                fadeUIElement = oscTouchFade2;
             }
 
+            // Place element where the finger is
+            event.target.setAttribute('cx', touch.pageX);
+            event.target.setAttribute('cy', touch.pageY);
+            fadeUIElement.setAttribute('cx', touch.pageX - fadeUIOffset);
+            fadeUIElement.setAttribute('cy', touch.pageY);
+
             event.preventDefault();
+        }
+    }
+
+    function _handleFadeMove (event) {
+        if (event.targetTouches.length == 1) {
+            var touch = event.targetTouches[0];
+            event.target.setAttribute('cx', touch.pageX);
+
+            if (event.target.id === oscTouchFade1.id) {
+                oscTouchFade1Val = oscTouch1.getAttribute('cx') - touch.pageX;
+                self.board.setPrimaryFade(map(-1*oscTouchFade1Val, -35, 35, -2, 2));
+            } else {
+                oscTouchFade2Val = oscTouch2.getAttribute('cx') - touch.pageX;
+                // TODO (CAW) -- range should reflect size of outer sphere
+                self.board.setSecondaryFade(map(-1*oscTouchFade2Val, -35, 35, -2, 2));
+            }
         }
     }
 };

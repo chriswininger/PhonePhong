@@ -10,6 +10,14 @@ window.PhonePhong.BoardLogic = function (audCtx, opts) {
     this.osc2.type = 'sine';
     //osc2.frequency.value = 1000;
 
+    this.osc1PanCtrl = audCtx.createPanner();
+    this.osc1PanCtrl.panningModel = "equalpower";
+    this.osc1PanCtrl.setPosition(0,0,0);
+
+    this.osc2PanCtrl = audCtx.createPanner();
+    this.osc2PanCtrl.panningModel = "equalpower";
+    this.osc2PanCtrl.setPosition(0,0,0);
+
     this.oscVol1 = audCtx.createGain();
     this.oscVol2 = audCtx.createGain();
     // initialize default settings
@@ -27,8 +35,10 @@ window.PhonePhong.BoardLogic = function (audCtx, opts) {
     this.osc1GainCtrl.connect(this.oscVol1.gain);
     this.osc2GainCtrl.connect(this.oscVol2.gain);
 
-    this.osc1.connect(this.oscVol1);
-    this.osc2.connect(this.oscVol2);
+    this.osc1.connect(this.osc1PanCtrl);
+    this.osc2.connect(this.osc2PanCtrl);
+    this.osc1PanCtrl.connect(this.oscVol1);
+    this.osc2PanCtrl.connect(this.oscVol2);
     this.oscVol1.connect(this.mainVol);
     this.oscVol2.connect(this.mainVol);
     this.mainVol.connect(this.audCtx.destination);
@@ -112,6 +122,11 @@ $class.setOsc1Type = function (type) {
   this.osc1.type = type;
 };
 
+$class.setOsc2Type = function (type) {
+    this.osc2.type = type;
+};
+
+
 $class.stopOsc1Pulse = function () {
     this.osc1GainCtrl.disconnect(this.oscVol1.gain);
 };
@@ -142,6 +157,13 @@ $class.osc2On = function () {
     this.oscVol2.connect(this.audCtx.destination);
 };
 
+$class.setPrimaryFade = function (val) {
+    this.osc1PanCtrl.setPosition(val,0,0);
+};
+
+$class.setSecondaryFade = function (val) {
+    this.osc2PanCtrl.setPosition(val,0,0);
+};
 
 $class.updateBoard = function (values) {
     this.setOsc1Vol(values.osc1Vol);
