@@ -55,10 +55,10 @@ var $class = PhonePhong.BoardLogic.prototype;
 
 var mainInterval;
 $class.init = function () {
-    this.osc1.start();
-    this.osc2.start();
-    this.osc1GainCtrl.start();
-    this.osc2GainCtrl.start();
+    this.osc1.start(0);
+    this.osc2.start(0);
+    this.osc1GainCtrl.start(0);
+    this.osc2GainCtrl.start(0);
     //mainInterval = setInterval(_.bind(this.primaryLoop, this), this.mainTimeOffset);
 };
 

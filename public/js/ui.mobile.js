@@ -26,14 +26,23 @@ window.PhonePhong.UI = function (board) {
 
 var $class = PhonePhong.UI.prototype;
 
-var oscTouchOnOff1, oscTouchOnOff2, oscTouchFade1, oscTouchFade2;
-var oscTouchFade1Val = 0, oscTouchFade2Val = 0;
+var oscTouchOnOff1,
+    oscTouchOnOff2,
+    oscTouchFade1,
+    oscTouchFade2,
+    oscTouch1,
+    oscTouch2;
+
+var oscTouchFade1Val = 0, oscTouchFade2Val = 0, lastPinchDist = 0;
+
 $class.createComponents = function () {
     $('#phongUIGrid').height(window.innerHeight);
     oscTouchOnOff1 = document.getElementById('oscTouchOnOff1');
     oscTouchOnOff2 = document.getElementById('oscTouchOnOff2');
     oscTouchFade1 = document.getElementById('oscTouchFade1');
     oscTouchFade2 = document.getElementById('oscTouchFade2');
+    oscTouch1 = document.getElementById('oscTouch1'),
+    oscTouch2 = document.getElementById('oscTouch2');
 
     oscTouchOnOff1.setAttribute('y', window.innerHeight - oscTouchOnOff1.getAttribute('height'));
     oscTouchOnOff2.setAttribute('y', window.innerHeight - oscTouchOnOff2.getAttribute('height'));
@@ -41,11 +50,23 @@ $class.createComponents = function () {
 
 $class.listen = function () {
     var self = this;
-    var oscTouch1 = document.getElementById('oscTouch1'),
-        oscTouch2 = document.getElementById('oscTouch2');
+
+    var osc1PulseOn = true;
+    $(oscTouch1).on('tap',function(){
+        if (osc1PulseOn) self.board.stopOsc1Pulse();
+        else self.board.startOsc1Pulse();
+        osc1PulseOn = !osc1PulseOn;
+    });
+
+
+    $(oscTouch1).on('taphold', _handleLongTouch);
+    $(oscTouch2).on('taphold', _handleLongTouch);
+
 
     oscTouch1.addEventListener('touchmove', _handleOSCTouchMove, false);
     oscTouch2.addEventListener('touchmove', _handleOSCTouchMove, false);
+    oscTouch1.addEventListener('touchend', _handleOSCTouchEnd, false);
+    oscTouch2.addEventListener('touchend', _handleOSCTouchEnd, false);
 
     oscTouchFade1.addEventListener('touchmove', _handleFadeMove, false);
     oscTouchFade2.addEventListener('touchmove', _handleFadeMove, false);
@@ -55,12 +76,6 @@ $class.listen = function () {
     oscTouchOnOff2.addEventListener('touchstart', _handleOff);
     oscTouchOnOff2.addEventListener('touchend', _handleOn);
 
-    var osc1PulseOn = true;
-    $(oscTouch1).on('tap',function(){
-        if (osc1PulseOn) self.board.stopOsc1Pulse();
-        else self.board.startOsc1Pulse();
-        osc1PulseOn = !osc1PulseOn;
-    });
 
     var osc2PulseOn = true;
     $(oscTouch2).on('tap',function(){
@@ -70,8 +85,6 @@ $class.listen = function () {
     });
 
 
-    $(oscTouch1).on('taphold', _handleLongTouch);
-    $(oscTouch2).on('taphold', _handleLongTouch);
 
     function _handleOff (event) {
         if (event.target === oscTouchOnOff1) {
@@ -142,7 +155,38 @@ $class.listen = function () {
             fadeUIElement.setAttribute('cy', touch.pageY);
 
             event.preventDefault();
+        } else if (event.targetTouches.length == 2) {
+            if (lastPinchDist === undefined) lastPinchDist = 0;
+
+            var x1 = event.targetTouches[0].pageX;
+            var y1 = event.targetTouches[0].pageY;
+            var x2 = event.targetTouches[1].pageX;
+            var y2 = event.targetTouches[1].pageY;
+
+            var dist = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            var change = dist - lastPinchDist;
+
+            var r = parseFloat(event.target.getAttribute('r'));
+            if (change > 0 && r <= 98) r += 2;
+            else if (r >= 62) r -= 2;
+
+            event.target.setAttribute('r', r);
+
+            if (event.target.id === oscTouch1.id) {
+                self.board.setOsc1Vol(map(r, 60, 100, 0.9949676394462585, 5));
+            } else if (event.target.id === oscTouch2.id) {
+                self.board.setOsc2Vol(map(r, 60, 100, 0.9949676394462585, 5));
+            }
+
+
+            lastPinchDist = dist;
         }
+
+        event.preventDefault();
+    }
+
+    function _handleOSCTouchEnd (event) {
+        lastPinchDist = 0;
     }
 
     function _handleFadeMove (event) {
