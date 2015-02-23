@@ -51,16 +51,25 @@ $class.createComponents = function () {
 $class.listen = function () {
     var self = this;
 
+
+
+    $(oscTouch1).on('taphold', _handleLongTouch);
+    $(oscTouch2).on('taphold', _handleLongTouch);
+
     var osc1PulseOn = true;
-    $(oscTouch1).on('tap',function(){
+    $(oscTouch1).on('doubletap',function(){
         if (osc1PulseOn) self.board.stopOsc1Pulse();
         else self.board.startOsc1Pulse();
         osc1PulseOn = !osc1PulseOn;
     });
 
 
-    $(oscTouch1).on('taphold', _handleLongTouch);
-    $(oscTouch2).on('taphold', _handleLongTouch);
+    var osc2PulseOn = true;
+    $(oscTouch2).on('doubletap',function(){
+        if (osc2PulseOn) self.board.stopOsc2Pulse();
+        else self.board.startOsc2Pulse();
+        osc2PulseOn = !osc2PulseOn;
+    });
 
 
     oscTouch1.addEventListener('touchmove', _handleOSCTouchMove, false);
@@ -77,12 +86,7 @@ $class.listen = function () {
     oscTouchOnOff2.addEventListener('touchend', _handleOn);
 
 
-    var osc2PulseOn = true;
-    $(oscTouch2).on('tap',function(){
-        if (osc2PulseOn) self.board.stopOsc2Pulse();
-        else self.board.startOsc2Pulse();
-        osc2PulseOn = !osc2PulseOn;
-    });
+
 
 
 

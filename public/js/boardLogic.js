@@ -20,6 +20,10 @@ window.PhonePhong.BoardLogic = function (audCtx, opts) {
 
     this.oscVol1 = audCtx.createGain();
     this.oscVol2 = audCtx.createGain();
+
+    this.oscVolOffset1 = audCtx.createGain();
+    this.oscVolOffset2 = audCtx.createGain();
+    this.oscVolOffset2.gain.value = this.oscVolOffset1.gain.value = 1.0;
     // initialize default settings
     //this.mainVol.gain.value = 0.5;
     //this.oscVol1.gain.value = 0.9949676394462585;
@@ -39,8 +43,10 @@ window.PhonePhong.BoardLogic = function (audCtx, opts) {
     this.osc2.connect(this.osc2PanCtrl);
     this.osc1PanCtrl.connect(this.oscVol1);
     this.osc2PanCtrl.connect(this.oscVol2);
-    this.oscVol1.connect(this.mainVol);
-    this.oscVol2.connect(this.mainVol);
+    this.oscVol1.connect(this.oscVolOffset1);
+    this.oscVol2.connect(this.oscVolOffset2);
+    this.oscVolOffset1.connect(this.mainVol);
+    this.oscVolOffset2.connect(this.mainVol);
     this.mainVol.connect(this.audCtx.destination);
 
     // defaults
@@ -88,12 +94,12 @@ $class.setMainVol = function (vol) {
 
 $class.setOsc1Vol = function (vol) {
     this.osc1Vol = vol;
-    this.oscVol1.gain.value = vol;
+    this.oscVolOffset1.gain.value = vol;
 };
 
 $class.setOsc2Vol = function (vol) {
     this.osc2Vol = vol;
-    this.oscVol2.gain.value = vol;
+    this.oscVolOffset2.gain.value = vol;
 };
 
 $class.setOsc1Freq = function (freq) {
