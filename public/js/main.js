@@ -15,7 +15,7 @@
         osc2Freq: 1000,
         primaryOffset: 0.5,
         osc1MaxFreq: 3000,
-        osc2MaxFreq: 3000,
+        osc2MaxFreq: 10,
         primaryOffsetMax: 10,
         secondaryOffsetMax: 8,
         secondaryOffset: 1.0

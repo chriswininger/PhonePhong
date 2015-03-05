@@ -145,7 +145,7 @@ $class.listen = function () {
                 fadeUIElement = oscTouchFade1;
             } else if (event.target.id === oscTouch2.id) {
                 self.board.setOsc2Freq(map(touch.pageY, (r/2), window.innerHeight - event.target.getAttribute('height'), 0, self.board.osc1MaxFreq));
-                self.board.setSecondaryOffset(map(touch.pageX, (r/2), window.innerWidth - r, 0, self.board.secondaryOffsetMax));
+                self.board.setSecondaryOffset(map(touch.pageX, (r/2), window.innerWidth - r, 0, self.board.secondaryOffsetMax) * self.board.mainTimeOffset);
 
                 fadeUIOffset = oscTouchFade2Val;
                 // set other elements to move
