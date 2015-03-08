@@ -5,10 +5,7 @@
  *  so mobile devices can reach it
  * @type {*|exports}
  */
-
 var express = require('express');
 var app = express();
-
 app.use(express.static('public'));
-
 app.listen(3000);
