@@ -74,6 +74,7 @@
         oscTouchOnOff2.addEventListener('touchend', _handleOn);
         // handle pad touch
         backgroundPad.addEventListener('touchstart', _handleBackGroundTouchStart);
+        backgroundPad.addEventListener('touchend', _handleBackGroundTouchEnd);
 
         function _handleDoubleTap (event) {
             if (event.target === oscTouch1) {
@@ -120,13 +121,41 @@
             event.preventDefault();
         }
 
+        var _touches = {};
         function  _handleBackGroundTouchStart (event) {
             if (event.target !== backgroundPad) return;
             for (var i = 0; i < event.targetTouches.length; i++) {
                 var touch = event.targetTouches[i];
                 // TODO (CAW) could get tricky when oscillators are close together
-                if (isTouchAroundOsc(oscTouch1, touch)) console.log('!!! Turn it off osc1');
-                else if (isTouchAroundOsc(oscTouch2, touch)) console.log('!!! Turn if off osc2');
+                if (isTouchAroundOsc(oscTouch1, touch)) {
+                    console.log('!!! Turn it off osc1');
+                    self.board.osc1Off();
+                    _touches[touch.identifier] = { on: _.bind(self.board.osc1On, self.board) };
+                }
+                else if (isTouchAroundOsc(oscTouch2, touch)) {
+                    console.log('!!! Turn if off osc2');
+                    self.board.osc2Off();
+                    _touches[touch.identifier] = {on: _.bind(self.board.osc2On, self.board) };
+                }
+            }
+        }
+
+        function  _handleBackGroundTouchEnd (event) {
+            if (event.target !== backgroundPad) return;
+            for (var i = 0; i < event.changedTouches.length; i++) {
+                var touch = event.changedTouches[i];
+                if (_touches[touch.identifier] && _.isFunction(_touches[touch.identifier].on) )
+                    _touches[touch.identifier].on();
+
+                // TODO (CAW) could get tricky when oscillators are close together
+                //if (isTouchAroundOsc(oscTouch1, touch)) {
+                 //   console.log('!!! Turn it on osc1');
+                   // self.board.osc1On();
+               // }
+               // else if (isTouchAroundOsc(oscTouch2, touch)) {
+                 //   console.log('!!! Turn if on osc2');
+                   // self.board.osc2On();
+                //}
             }
         }
 
@@ -233,7 +262,7 @@
                 b = Math.abs(touch.clientY - cY),
                 c = Math.sqrt(Math.pow(a,2) + Math.pow(b,2));
 
-            return c < radius + 30;
+            return c < radius + 100;
         }
     };
 
