@@ -1,0 +1,25 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.page {
+    margin: 0;
+    padding: 0;
+}
+
+.ui-display-area {
+    background-color: darkslategray;
+    height: 800px;
+    width: 100%;
+}
+
+.map-note {
+    fill: #f17f25;
+    stroke-width: 3;
+    stroke: rgb(0, 0, 0);
+}
+
+.map-note.map-note-off {
+    opacity: 0.6;
+}
