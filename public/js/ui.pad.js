@@ -127,16 +127,23 @@
             for (var i = 0; i < event.targetTouches.length; i++) {
                 var touch = event.targetTouches[i];
                 // TODO (CAW) could get tricky when oscillators are close together
-                if (isTouchAroundOsc(oscTouch1, touch)) {
-                    console.log('!!! Turn it off osc1');
-                    self.board.osc1Off();
-                    _touches[touch.identifier] = { on: _.bind(self.board.osc1On, self.board) };
+                if (isTouchAroundOsc(oscTouch1, touch) || isTouchAroundOsc(oscTouch2, touch)) {
+					var dist1 = getTouchDist(oscTouch1, touch), dist2 = getTouchDist(oscTouch2, touch);
+					if (dist1 <= dist2) {
+						console.log('!!! Turn it off osc1');
+						self.board.osc1Off();
+						_touches[touch.identifier] = {on: _.bind(self.board.osc1On, self.board)};
+					} else {
+						console.log('!!! Turn it off osc2');
+						self.board.osc2Off();
+						_touches[touch.identifier] = {on: _.bind(self.board.osc2On, self.board)};
+					}
                 }
-                else if (isTouchAroundOsc(oscTouch2, touch)) {
+                /*else if (isTouchAroundOsc(oscTouch2, touch)) {
                     console.log('!!! Turn if off osc2');
                     self.board.osc2Off();
                     _touches[touch.identifier] = {on: _.bind(self.board.osc2On, self.board) };
-                }
+                }*/
             }
         }
 
@@ -174,11 +181,11 @@
                 var touch2x = parseFloat(oscTouch2.getAttribute('cx'))
                 var touch2r = parseFloat(oscTouch2.getAttribute('r'));
                 // calculate frequency
-                //var freq = map(touch.pageY, (r/2), window.innerHeight - r, 0, self.board.osc1MaxFreq);
-                // freq2 map(touch.pageY, (r/2), window.innerHeight - event.target.getAttribute('height'), 0, self.board.osc1MaxFreq)
-                var note = PhonePhong.NoteMap[Math.round(map(touch.pageY, (r/2), window.innerHeight - r, 0, (PhonePhong.NoteMap.length - 1)))];
-                if (!note) note = PhonePhong.NoteMap[PhonePhong.NoteMap.length-1];
-                var freq = !!note ? note.freq : 440;
+                var freq = map(touch.pageY, (r/2), window.innerHeight - r, 0, self.board.osc1MaxFreq);
+                // ?? freq2 map(touch.pageY, (r/2), window.innerHeight - event.target.getAttribute('height'), 0, self.board.osc1MaxFreq)
+                //var note = PhonePhong.NoteMap[Math.round(map(touch.pageY, (r/2), window.innerHeight - r, 0, (PhonePhong.NoteMap.length - 1)))];
+                //if (!note) note = PhonePhong.NoteMap[PhonePhong.NoteMap.length-1];
+                //var freq = !!note ? note.freq : 440;
                 if (freq<0)freq=0;
 
                 var fadeUIElement, fadeUIOffset;
@@ -252,16 +259,20 @@
             }
         }
 
+		function getTouchDist (osc, touch) {
+			var cX = parseFloat(osc.getAttribute('cx')),
+				cY = parseFloat(osc.getAttribute('cy')),
+				a = Math.abs(touch.clientX - cX),
+				b = Math.abs(touch.clientY - cY),
+				c = Math.sqrt(Math.pow(a,2) + Math.pow(b,2));
+
+			return c;
+		}
 
         function isTouchAroundOsc (osc, touch) {
            // just check distance between click and center of osc
-            var cX = parseFloat(osc.getAttribute('cx')),
-                cY = parseFloat(osc.getAttribute('cy')),
-                radius = parseFloat(osc.getAttribute('r')),
-                a = Math.abs(touch.clientX - cX),
-                b = Math.abs(touch.clientY - cY),
-                c = Math.sqrt(Math.pow(a,2) + Math.pow(b,2));
-
+            var c = getTouchDist(osc, touch);
+			var radius = parseFloat(osc.getAttribute('r'));
             return c < radius + 100;
         }
     };
