@@ -148,19 +148,23 @@ $class.startOsc2Pulse = function () {
 };
 
 $class.osc1Off = function () {
-    this.oscVol1.disconnect(this.audCtx.destination);
+    this.oscVolOffset1.gain.value = 0;
+    //this.oscVol1.disconnect(this.audCtx.destination);
 };
 
 $class.osc1On = function () {
-    this.oscVol1.connect(this.audCtx.destination);
+    this.oscVolOffset1.gain.value = this.osc1Vol;
+    //this.oscVol1.connect(this.audCtx.destination);
 };
 
 $class.osc2Off = function () {
-    this.oscVol2.disconnect(this.audCtx.destination);
+    this.oscVolOffset2.gain.value = 0;
+    //this.oscVol2.disconnect(this.audCtx.destination);
 };
 
 $class.osc2On = function () {
-    this.oscVol2.connect(this.audCtx.destination);
+    this.oscVolOffset2.gain.value = this.osc2Vol;
+    //this.oscVol2.connect(this.audCtx.destination);
 };
 
 $class.setPrimaryFade = function (val) {

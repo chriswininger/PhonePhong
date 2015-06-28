@@ -1,5 +1,8 @@
 {
   "devDependencies": {
-    "gulp": "^3.9.0"
+    "gulp": "^3.9.0",
+    "lodash": "^3.9.3",
+    "recursive-readdir": "^1.2.1",
+    "async": "^1.2.1"
   }
 }
